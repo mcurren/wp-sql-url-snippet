@@ -1,0 +1,99 @@
+<html>
+<head>
+	<title>Wordpress Find/Replace SQL Snippet Tool</title>
+	<style>
+	body {
+		font-family: Arial, Helvetica, sans-serif;
+		padding: 3em;
+		margin: 0;
+	}
+	section {
+		margin: 2em 0;
+	}
+	label {
+		display: block;
+		margin: 0.75em 0;
+	}
+	button {
+		font-size: 1em;
+		padding: 0.5em 1em;
+		border-radius: 8px;
+	}
+	#sql_generate {
+		background: #eee;
+		padding: 1.5em;
+	}
+	#colophon {
+		text-align: center;
+		padding: 1.5em;
+		font-size: 0.9em;
+	}
+	</style>
+</head>
+<body>
+	<header id="masthead">
+		<h1>Wordpress SQL Command Generator</h1>
+		<h2>Find/Replace commands to move a Wordpress install to a new URL</h2>
+	</header>
+	<section id="input">
+		<h1>Input</h1>
+		<label>
+			Old URL: 
+			<input type="text" id="old_url" name="old_url" value="http://oldsite.com">
+		</label>
+		<label>
+			New URL: 
+			<input type="text" id="new_url" name="new_url" value="http://newsite.com">
+		</label>
+		<label>
+			Table Prefix: 
+			<input type="text" id="table_prefix" name="table_prefix" value="wp_">
+		</label>
+		<button id="get_code" onClick="generateSql()">Generate SQL Command</button>
+	</section>
+	<section id="output">
+		<h1>Output</h1>
+		<div id="sql_generate">
+			<code>
+				UPDATE <span class="table_prefix_output"></span>options SET option_value = replace(option_value, '<span class="old_url_output"></span>', '<span class="new_url_output"></span>') WHERE option_name = 'home' OR option_name = 'siteurl'; <br>
+				UPDATE <span class="table_prefix_output"></span>posts SET guid = replace(guid, '<span class="old_url_output"></span>','<span class="new_url_output"></span>'); <br>
+				UPDATE <span class="table_prefix_output"></span>posts SET post_content = replace(post_content, '<span class="old_url_output"></span>', '<span class="new_url_output"></span>'); <br>
+				UPDATE <span class="table_prefix_output"></span>postmeta SET meta_value = replace(meta_value, '<span class="old_url_output"></span>', '<span class="new_url_output"></span>');
+			</code>
+		</div>
+	</section>
+	<footer id="colophon">
+		&copy; 2016 Michael Curren
+	</footer>
+	<script>
+		var oldUrlInput = document.getElementById("old_url").value,
+				newUrlInput = document.getElementById("new_url").value,
+				tablePrefixInput = document.getElementById("table_prefix").value;
+
+		var oldUrlOutput = document.getElementsByClassName("old_url_output"),
+				newUrlOutput = document.getElementsByClassName("new_url_output"),
+				tablePrefixOutput = document.getElementsByClassName("table_prefix_output");
+
+		var sqlGenerate = document.getElementById("sql_generate");
+
+		var generateSql = function() {
+			for (var i = 0; i < oldUrlOutput.length; i++) {
+    		oldUrlOutput[i].innerHTML = oldUrlInput;
+			}
+			// oldUrlOutput.innerHTML = oldUrlInput;
+			for (var i = 0; i < newUrlOutput.length; i++) {
+    		newUrlOutput[i].innerHTML = newUrlInput;
+			}
+			// newUrlOutput.innerHTML = newUrlInput;
+			for (var i = 0; i < tablePrefixOutput.length; i++) {
+    		tablePrefixOutput[i].innerHTML = tablePrefixInput;
+			}
+			// tablePrefixOutput.innerHTML = tablePrefixInput;
+			console.log('Old URL: '+oldUrlInput);
+			console.log('New URL: '+newUrlInput);
+			console.log('Table Prefix: '+tablePrefixInput);
+			// console.log('Table Prefix Outputs: '+tablePrefixOutput);
+		}
+	</script>
+</body>
+</html>
