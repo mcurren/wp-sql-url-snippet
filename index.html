@@ -2,54 +2,113 @@
 <head>
 	<title>Wordpress Find/Replace SQL Snippet Tool</title>
 	<style>
-	body {
-		font-family: Arial, Helvetica, sans-serif;
-		padding: 3em;
-		margin: 0;
-	}
-	section {
-		margin: 2em 0;
-	}
-	label {
-		display: block;
-		margin: 0.75em 0;
-	}
-	button {
-		font-size: 1em;
-		padding: 0.5em 1em;
-		border-radius: 8px;
-	}
-	#sql_generate {
-		background: #eee;
-		padding: 1.5em;
-	}
-	#colophon {
-		text-align: center;
-		padding: 1.5em;
-		font-size: 0.9em;
-	}
+		*, *:before, *:after {
+			box-sizing: border-box;
+		}
+		body {
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 16px;
+			line-height: 1.5em;
+			color: #222;
+			padding: 2em;
+			margin: 0;
+		}
+		section {
+			margin: 2rem 0;
+		}
+		section:before, section:after {
+			content: '';
+			display: table;
+			clear: both;
+		}
+		h1, h2 {
+			line-height: 1.3em;
+		}
+		fieldset {
+			margin: 1rem 0;
+			padding: 0.5rem 2rem 0.5rem 1rem;
+			border: 0;
+			border-left: 2px solid #666;
+		}
+		small {
+			display: block;
+			color: #ccc;
+		}
+		label {
+			display: block;
+			color: #666;
+			margin: 0.25rem 0;
+		}
+		input {
+			display: block;
+			max-width: 100%;
+			font-size: 1rem;
+			color: #666;
+			margin: 0.25rem 0;
+			padding-bottom: 0.25rem;
+			border: 0;
+			border-bottom: 1px solid #aaa;
+		}
+		input.weburl {
+			width: 100%;			
+		}
+		input:focus {
+			border-color: #222;
+			outline: 0;
+		}
+		#sql_generate {
+			background: #eee;
+			padding: 1.5rem;
+		}
+		#colophon {
+			font-size: 0.85rem;
+			text-align: center;
+			letter-spacing: 0.05rem;
+			padding: 1.5rem;
+		}
+		@media all and (max-width: 599px) {
+			input.weburl {
+				width: 100%;			
+			}
+		}
+		@media all and (min-width: 600px) {
+			fieldset {
+				width: 50%;
+				float: left;
+			}
+		}
+		@media all and (min-width: 1200px) {
+			fieldset {
+				width: 33%;
+				float: left;
+			}
+		}
 	</style>
 </head>
 <body>
 	<header id="masthead">
 		<h1>Wordpress SQL Command Generator</h1>
-		<h2>Find/Replace commands to move a Wordpress install to a new URL</h2>
+		<p>Make the database find/replace commands for migrating a Wordpress install.</p>
 	</header>
 	<section id="input">
 		<h1>Input</h1>
-		<label>
-			Old URL: 
-			<input type="text" id="old_url" name="old_url" value="http://old_site.com">
-		</label>
-		<label>
-			New URL: 
-			<input type="text" id="new_url" name="new_url" value="http://new_site.com">
-		</label>
-		<label>
-			Table Prefix: 
-			<input type="text" id="table_prefix" name="table_prefix" value="wp_">
-		</label>
-		<button id="get_code" onClick="generateSql()">Generate SQL Command</button>
+		<form name="wpsql" id="wpsql-form" action="#">
+			<fieldset>
+				<label for="old_url">Old Site URL</label>
+				<input type="text" id="old_url" name="old_url" data-target="old_url_output" value="" size="30" placeholder="http://old_site.com" class="weburl">
+				<small>e.g. <em>http://old_site.com</em></small>
+			</fieldset>
+			<fieldset>
+				<label>New Site URL</label>
+				<input type="text" id="new_url" name="new_url" data-target="new_url_output" value="" size="30" placeholder="http://new_site.com" class="weburl">
+				<small>e.g. <em>http://new_site.com</em></small>
+			</fieldset>
+			<fieldset>
+				<label>WP Table Prefix</label>
+				<input type="text" id="table_prefix" name="table_prefix" data-target="table_prefix_output" value="" size="6" placeholder="wp_" class="prefix">
+				<small>e.g. <em>wp_</em></small>
+			</fieldset>
+		</form>
 	</section>
 	<section id="output">
 		<h1>Output</h1>
@@ -66,34 +125,30 @@
 		&copy; 2016 Michael Curren
 	</footer>
 	<script>
-		var oldUrlInput = document.getElementById("old_url").value,
-				newUrlInput = document.getElementById("new_url").value,
-				tablePrefixInput = document.getElementById("table_prefix").value;
 
-		var oldUrlOutput = document.getElementsByClassName("old_url_output"),
-				newUrlOutput = document.getElementsByClassName("new_url_output"),
-				tablePrefixOutput = document.getElementsByClassName("table_prefix_output");
+		//creates a listener for when you press a key
+		window.onkeyup = keyup;
 
-		var sqlGenerate = document.getElementById("sql_generate");
+		//creates global variables
+		var inputTextValue, 
+				inputTargetElements;
 
-		var generateSql = function() {
-			for (var i = 0; i < oldUrlOutput.length; i++) {
-    		oldUrlOutput[i].innerHTML = oldUrlInput;
+		function keyup(e) {
+
+			//setting target elements for the active input field
+		  inputTargetClass = e.target.getAttribute("data-target");
+		  inputTargetElements = document.getElementsByClassName(inputTargetClass);
+
+		  //setting your input text to the global variable on each key press
+		  inputTextValue = e.target.value;
+
+		  //update the value of each target element
+		  for (var i = 0; i < inputTargetElements.length; i++) {
+		  	inputTargetElements[i].textContent = inputTextValue;
 			}
-			// oldUrlOutput.innerHTML = oldUrlInput;
-			for (var i = 0; i < newUrlOutput.length; i++) {
-    		newUrlOutput[i].innerHTML = newUrlInput;
-			}
-			// newUrlOutput.innerHTML = newUrlInput;
-			for (var i = 0; i < tablePrefixOutput.length; i++) {
-    		tablePrefixOutput[i].innerHTML = tablePrefixInput;
-			}
-			// tablePrefixOutput.innerHTML = tablePrefixInput;
-			console.log('Old URL: '+oldUrlInput);
-			console.log('New URL: '+newUrlInput);
-			console.log('Table Prefix: '+tablePrefixInput);
-			// console.log('Table Prefix Outputs: '+tablePrefixOutput);
+
 		}
+
 	</script>
 </body>
 </html>
